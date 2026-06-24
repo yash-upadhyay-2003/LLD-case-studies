@@ -8,8 +8,34 @@
 A high-performance, low-level design (LLD) implementation of a scalable ticket reservation system capable of handling catastrophic traffic surges (e.g., millions of concurrent clicks during blockbuster drops). Built with strict object-oriented paradigms, thread safety, decoupling boundaries, and state isolation.
 
 ---
+## High Level Architecture
 
-## 📌 Architectural Blueprint
+```mermaid
+flowchart LR
+
+    User[User]
+
+    User --> API[Movie Booking Service]
+
+    API --> MovieService[Movie Service]
+    API --> BookingManager[Booking Manager]
+
+    MovieService --> DB[(PostgreSQL)]
+
+    BookingManager --> SeatLockManager[Seat Lock Manager]
+
+    SeatLockManager --> Redis[(Redis)]
+
+    BookingManager --> PaymentService[Payment Service]
+
+    PaymentService --> PaymentGateway[Payment Gateway]
+
+    BookingManager --> DB
+
+    PaymentService --> DB
+```
+
+## 📌 Architectural Blueprint LLD
 
 The core domain relies on an explicit separation of concerns. While read-heavy operations handle catalog exploration, the write-heavy reservation engine isolates state modification through dedicated transaction boundaries.
 
