@@ -5,7 +5,7 @@
 [![Design Patterns](https://img.shields.io/badge/Patterns-Strategy%20%7C%20Observer%20%7C%20State-green.svg?style=flat-square)](#)
 [![Performance](https://img.shields.io/badge/Concurrency-Atomic%20%7C%20Locking-red.svg?style=flat-square)](#)
 
-A high-performance, low-level design (LLD) implementation of a scalable ticket reservation system capable of handling catastrophic traffic surges (e.g., millions of concurrent clicks during blockbusters drops). Built with strict object-oriented paradigms, thread safety, decoupling boundaries, and state isolation.
+A high-performance, low-level design (LLD) implementation of a scalable ticket reservation system capable of handling catastrophic traffic surges (e.g., millions of concurrent clicks during blockbuster drops). Built with strict object-oriented paradigms, thread safety, decoupling boundaries, and state isolation.
 
 ---
 
@@ -102,6 +102,7 @@ classDiagram
     SeatLockManager ..> Seat : Dependency
     SeatLockManager ..> MovieBookingService : Dependency
     MovieBookingService ..> Show : Manages
+    
 ⚡ Core Design Implementations🏎️ 1. Ephemeral Lease Concurrency ControlTo prevent the catastrophic Thundering Herd problem when 500+ users attempt to checkout the exact same cinema seat, the system decouples locking logic away from database transactions:Atomic Leases: The SeatLockManager issues a low-overhead, short-lived lease on specific seat indices during the checkout lifecycle.Deterministic Transitions: Seat availability changes state strictly through bounded inputs inside a secure transaction ring:$$\text{AVAILABLE} \xrightarrow{\text{User Selection}} \text{LOCKED} \xrightarrow{\text{Settlement}} \text{BOOKED}$$Self-Healing Backouts: A TTL scheduler clears abandoned or timed-out orders automatically, returning seat allocations gracefully back to AVAILABLE.🎛️ 2. Dynamic Policy Extensibility (Strategy Pattern)Pricing Policies: By defining a modular PricingStrategy adapter interface, the layout supports fluid configurations for dynamic pricing changes (e.g., WeekdayPricingStrategy vs. WeekendPricingStrategy) without breaking internal entity logic.Settlement Inversion: Payments decouple underlying processors completely via standard polymorphism (CreditCardPaymentStrategy, open hooks for UPI).🔔 3. Reactive State Propagations (Observer Pattern)Maintains system-wide alignment by driving asynchronous notifications via structural hooks (MovieSubject, MovieObserver, UserObserver). Any fundamental change in availability or schedule updates dependency targets across the cluster in real time.📂 Structural Directory AnatomyPlaintext├── entities/       # Encapsulated state representations (User, Movie, Show, Seat, Booking)
 ├── enums/          # Bounded system typings (PaymentStatus, SeatStatus, SeatType)
 ├── observer/       # Event-driven subscription hooks for cross-domain notifications
